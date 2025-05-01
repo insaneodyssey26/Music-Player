@@ -1,8 +1,6 @@
 package com.masum.musicplayer.presentation.viewmodel
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +9,6 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.masum.musicplayer.data.model.Song
 import com.masum.musicplayer.data.repository.MusicRepository
-import com.masum.musicplayer.MusicPlayerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MusicViewModel(private val context: Context) : ViewModel() {
+class MusicViewModel(context: Context) : ViewModel() {
     private val repository = MusicRepository(context)
     private var player: ExoPlayer? = null
     private val TAG = "MusicViewModel"
@@ -152,22 +149,32 @@ class MusicViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    private fun sendCommandToService(action: String, songId: Long? = null) {
-        val intent = Intent(context, MusicPlayerService::class.java).apply {
-            putExtra("ACTION", action)
-            songId?.let { putExtra("SONG_ID", it) }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
-        }
-    }
-    
     fun playSong(song: Song) {
-        _currentSong.value = song
-        sendCommandToService("PLAY", song.id)
-        incrementPlayCount(song)
+        Log.d(TAG, "Playing song: ${song.title}")
+        try {
+            player?.let { exoPlayer ->
+                _currentSong.value = song
+                // Create a playlist with all songs
+                val mediaItems = songs.value.map { it.toMediaItem() }
+                exoPlayer.setMediaItems(mediaItems)
+                // Find the index of the current song in the playlist
+                val currentIndex = songs.value.indexOf(song)
+                if (currentIndex != -1) {
+                    exoPlayer.seekTo(currentIndex, 0)
+                }
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+                startProgressUpdate()
+                // Increment play count for most played
+                incrementPlayCount(song)
+            } ?: run {
+                Log.e(TAG, "Player not initialized")
+                _error.value = "Player not initialized"
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play song: ${e.message}")
+            _error.value = "Failed to play song: ${e.message}"
+        }
     }
     
     fun getCurrentSongWithoutRestart(): Song? {
@@ -175,19 +182,46 @@ class MusicViewModel(private val context: Context) : ViewModel() {
     }
     
     fun togglePlayPause() {
-        sendCommandToService("TOGGLE_PLAY_PAUSE")
+        try {
+            player?.let { exoPlayer ->
+                if (exoPlayer.isPlaying) {
+                    exoPlayer.pause()
+                } else {
+                    exoPlayer.play()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to toggle play/pause: ${e.message}")
+            _error.value = "Failed to toggle play/pause: ${e.message}"
+        }
     }
     
     fun resumeSong() {
-        sendCommandToService("RESUME")
+        try {
+            player?.play()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to resume song: ${e.message}")
+            _error.value = "Failed to resume song: ${e.message}"
+        }
     }
     
     fun pauseSong() {
-        sendCommandToService("PAUSE")
+        try {
+            player?.pause()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to pause song: ${e.message}")
+            _error.value = "Failed to pause song: ${e.message}"
+        }
     }
     
     fun seekTo(position: Long) {
-        sendCommandToService("SEEK", position)
+        try {
+            player?.seekTo(position)
+            _currentPosition.value = position
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to seek: ${e.message}")
+            _error.value = "Failed to seek: ${e.message}"
+        }
     }
     
     fun seekToPercentage(percentage: Float) {
@@ -203,19 +237,53 @@ class MusicViewModel(private val context: Context) : ViewModel() {
     }
     
     fun next() {
-        sendCommandToService("NEXT")
+        try {
+            player?.let { exoPlayer ->
+                if (exoPlayer.hasNextMediaItem()) {
+                    exoPlayer.seekToNext()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play next song: ${e.message}")
+            _error.value = "Failed to play next song: ${e.message}"
+        }
     }
     
     fun previous() {
-        sendCommandToService("PREVIOUS")
+        try {
+            player?.let { exoPlayer ->
+                if (exoPlayer.hasPreviousMediaItem()) {
+                    exoPlayer.seekToPrevious()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play previous song: ${e.message}")
+            _error.value = "Failed to play previous song: ${e.message}"
+        }
     }
     
     fun rewind() {
-        sendCommandToService("REWIND")
+        try {
+            player?.let { exoPlayer ->
+                val newPosition = (exoPlayer.currentPosition - 5000).coerceAtLeast(0)
+                exoPlayer.seekTo(newPosition)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to rewind: ${e.message}")
+            _error.value = "Failed to rewind: ${e.message}"
+        }
     }
     
     fun forward() {
-        sendCommandToService("FORWARD")
+        try {
+            player?.let { exoPlayer ->
+                val newPosition = (exoPlayer.currentPosition + 5000).coerceAtMost(exoPlayer.duration)
+                exoPlayer.seekTo(newPosition)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to forward: ${e.message}")
+            _error.value = "Failed to forward: ${e.message}"
+        }
     }
 
     override fun onCleared() {
