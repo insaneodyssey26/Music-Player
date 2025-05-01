@@ -1,39 +1,32 @@
 package com.masum.musicplayer.presentation.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
 import com.masum.musicplayer.navigation.Screen
 
 @Composable
 fun ModernBottomBar(
-    currentDestination: NavDestination?,
-    navController: NavHostController
+    currentRoute: String,
+    onNavigate: (String) -> Unit
 ) {
-    val screens = listOf(
-        Screen.Home,
-        Screen.Settings
-    )
-
     NavigationBar {
-        screens.forEach { screen ->
-            NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = screen.title) },
-                label = { Text(screen.title) },
-                selected = currentDestination?.route == screen.route,
-                onClick = {
-                    if (currentDestination?.route != screen.route) {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            )
-        }
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            label = { Text(Screen.Home.title) },
+            selected = currentRoute == Screen.Home.route,
+            onClick = { onNavigate(Screen.Home.route) }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text(Screen.Settings.title) },
+            selected = currentRoute == Screen.Settings.route,
+            onClick = { onNavigate(Screen.Settings.route) }
+        )
     }
 } 

@@ -29,7 +29,7 @@ fun AppDrawer(
             
             // Signature
             Text(
-                text = "Made with ♥ by Masum",
+                text = "Made by Masum :)",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

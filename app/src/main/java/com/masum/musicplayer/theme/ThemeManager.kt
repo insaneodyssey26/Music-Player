@@ -13,6 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
@@ -29,8 +32,104 @@ object ThemeManager {
 
     fun getThemeMode(): ThemeMode = currentThemeMode
 
+    // Modern color palette
+    private val PrimaryColor = Color(0xFF6C63FF)  // Vibrant purple
+    private val SecondaryColor = Color(0xFF4CAF50) // Fresh green
+    private val AccentColor = Color(0xFFFF4081)    // Energetic pink
+    private val BackgroundColor = Color(0xFF121212) // Dark background
+    private val SurfaceColor = Color(0xFF1E1E1E)   // Slightly lighter surface
+    private val OnBackgroundColor = Color(0xFFFFFFFF) // White text
+    private val OnSurfaceColor = Color(0xFFE0E0E0)   // Light gray text
+
+    // Light theme colors
+    private val LightColorScheme = lightColorScheme(
+        primary = PrimaryColor,
+        secondary = SecondaryColor,
+        tertiary = AccentColor,
+        background = Color(0xFFF5F5F5),
+        surface = Color(0xFFFFFFFF),
+        onPrimary = Color(0xFFFFFFFF),
+        onSecondary = Color(0xFFFFFFFF),
+        onTertiary = Color(0xFFFFFFFF),
+        onBackground = Color(0xFF000000),
+        onSurface = Color(0xFF000000)
+    )
+
+    // Dark theme colors
+    private val DarkColorScheme = darkColorScheme(
+        primary = PrimaryColor,
+        secondary = SecondaryColor,
+        tertiary = AccentColor,
+        background = BackgroundColor,
+        surface = SurfaceColor,
+        onPrimary = Color(0xFFFFFFFF),
+        onSecondary = Color(0xFFFFFFFF),
+        onTertiary = Color(0xFFFFFFFF),
+        onBackground = OnBackgroundColor,
+        onSurface = OnSurfaceColor
+    )
+
+    // Custom typography
+    val MusicPlayerTypography = androidx.compose.material3.Typography(
+        displayLarge = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp,
+            letterSpacing = 0.5.sp
+        ),
+        displayMedium = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 28.sp,
+            letterSpacing = 0.5.sp
+        ),
+        displaySmall = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Medium,
+            fontSize = 24.sp,
+            letterSpacing = 0.5.sp
+        ),
+        headlineLarge = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            letterSpacing = 0.5.sp
+        ),
+        headlineMedium = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            letterSpacing = 0.5.sp
+        ),
+        headlineSmall = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            letterSpacing = 0.5.sp
+        ),
+        bodyLarge = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Normal,
+            fontSize = 16.sp,
+            letterSpacing = 0.5.sp
+        ),
+        bodyMedium = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            letterSpacing = 0.5.sp
+        ),
+        bodySmall = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Normal,
+            fontSize = 12.sp,
+            letterSpacing = 0.5.sp
+        )
+    )
+
     @Composable
     fun MusicPlayerTheme(
+        darkTheme: Boolean = true,
         content: @Composable () -> Unit
     ) {
         val view = LocalView.current
@@ -42,31 +141,7 @@ object ThemeManager {
             ThemeMode.SYSTEM -> isSystemInDarkTheme
         }
 
-        val colorScheme = if (isDarkTheme) {
-            darkColorScheme(
-                primary = Color(0xFF7C4DFF),
-                secondary = Color(0xFF03DAC6),
-                tertiary = Color(0xFF3700B3),
-                background = Color(0xFF121212),
-                surface = Color(0xFF1E1E1E),
-                onBackground = Color(0xFFFFFFFF),
-                onSurface = Color(0xFFFFFFFF),
-                surfaceVariant = Color(0xFF2D2D2D),
-                onSurfaceVariant = Color(0xFFB3B3B3)
-            )
-        } else {
-            lightColorScheme(
-                primary = Color(0xFF6200EE),
-                secondary = Color(0xFF03DAC6),
-                tertiary = Color(0xFF3700B3),
-                background = Color(0xFFF5F5F5),
-                surface = Color(0xFFFFFFFF),
-                onBackground = Color(0xFF121212),
-                onSurface = Color(0xFF121212),
-                surfaceVariant = Color(0xFFE0E0E0),
-                onSurfaceVariant = Color(0xFF757575)
-            )
-        }
+        val colorScheme = if (isDarkTheme) DarkColorScheme else LightColorScheme
 
         DisposableEffect(view) {
             val window = (view.context as Activity).window
@@ -78,17 +153,7 @@ object ThemeManager {
 
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = MaterialTheme.typography.copy(
-                headlineLarge = MaterialTheme.typography.headlineLarge.copy(
-                    letterSpacing = 0.15.sp
-                ),
-                titleLarge = MaterialTheme.typography.titleLarge.copy(
-                    letterSpacing = 0.sp
-                ),
-                bodyLarge = MaterialTheme.typography.bodyLarge.copy(
-                    letterSpacing = 0.5.sp
-                )
-            ),
+            typography = MusicPlayerTypography,
             content = content
         )
     }

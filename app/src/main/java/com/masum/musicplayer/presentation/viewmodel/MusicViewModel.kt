@@ -44,6 +44,18 @@ class MusicViewModel(context: Context) : ViewModel() {
     
     private var progressUpdateJob: Job? = null
     
+    // Recently Added: last 10 songs by a mock 'dateAdded' property (if available)
+    val recentlyAdded: StateFlow<List<Song>>
+        get() = MutableStateFlow(_songs.value.sortedByDescending { it.id }.take(10))
+
+    // Most Played: mock logic, just return first 10 songs for now
+    val mostPlayed: StateFlow<List<Song>>
+        get() = MutableStateFlow(_songs.value.take(10))
+
+    // Favorites: mock logic, just return first 5 songs for now
+    val favorites: StateFlow<List<Song>>
+        get() = MutableStateFlow(_songs.value.take(5))
+    
     init {
         Log.d(TAG, "Initializing MusicViewModel")
         try {
@@ -125,7 +137,14 @@ class MusicViewModel(context: Context) : ViewModel() {
         try {
             player?.let { exoPlayer ->
                 _currentSong.value = song
-                exoPlayer.setMediaItem(song.toMediaItem())
+                // Create a playlist with all songs
+                val mediaItems = songs.value.map { it.toMediaItem() }
+                exoPlayer.setMediaItems(mediaItems)
+                // Find the index of the current song in the playlist
+                val currentIndex = songs.value.indexOf(song)
+                if (currentIndex != -1) {
+                    exoPlayer.seekTo(currentIndex, 0)
+                }
                 exoPlayer.prepare()
                 exoPlayer.playWhenReady = true
                 startProgressUpdate()
@@ -191,7 +210,6 @@ class MusicViewModel(context: Context) : ViewModel() {
             player?.let { exoPlayer ->
                 val newPosition = (percentage * (duration.value)).toLong()
                 exoPlayer.seekTo(newPosition)
-                _currentPosition.value = newPosition
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to seek to percentage: ${e.message}")
@@ -199,32 +217,77 @@ class MusicViewModel(context: Context) : ViewModel() {
         }
     }
     
-    fun skipToNext() {
+    fun next() {
         try {
-            player?.seekToNext()
+            player?.let { exoPlayer ->
+                if (exoPlayer.hasNextMediaItem()) {
+                    exoPlayer.seekToNext()
+                }
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to skip to next: ${e.message}")
-            _error.value = "Failed to skip to next: ${e.message}"
+            Log.e(TAG, "Failed to play next song: ${e.message}")
+            _error.value = "Failed to play next song: ${e.message}"
         }
     }
     
-    fun skipToPrevious() {
+    fun previous() {
         try {
-            player?.seekToPrevious()
+            player?.let { exoPlayer ->
+                if (exoPlayer.hasPreviousMediaItem()) {
+                    exoPlayer.seekToPrevious()
+                }
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to skip to previous: ${e.message}")
-            _error.value = "Failed to skip to previous: ${e.message}"
+            Log.e(TAG, "Failed to play previous song: ${e.message}")
+            _error.value = "Failed to play previous song: ${e.message}"
         }
     }
     
+    fun rewind() {
+        try {
+            player?.let { exoPlayer ->
+                val newPosition = (exoPlayer.currentPosition - 5000).coerceAtLeast(0)
+                exoPlayer.seekTo(newPosition)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to rewind: ${e.message}")
+            _error.value = "Failed to rewind: ${e.message}"
+        }
+    }
+    
+    fun forward() {
+        try {
+            player?.let { exoPlayer ->
+                val newPosition = (exoPlayer.currentPosition + 5000).coerceAtMost(exoPlayer.duration)
+                exoPlayer.seekTo(newPosition)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to forward: ${e.message}")
+            _error.value = "Failed to forward: ${e.message}"
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        Log.d(TAG, "Cleaning up MusicViewModel resources")
         try {
-            player?.release()
-            player = null
+            // Stop progress update job
+            stopProgressUpdate()
+            
+            // Release the player
+            player?.let { exoPlayer ->
+                exoPlayer.stop()
+                exoPlayer.release()
+                player = null
+            }
+            
+            // Clear state
+            _currentSong.value = null
+            _isPlaying.value = false
+            _currentPosition.value = 0L
+            _duration.value = 0L
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to release player: ${e.message}")
-            _error.value = "Failed to release player: ${e.message}"
+            Log.e(TAG, "Error during cleanup: ${e.message}")
         }
     }
 } 

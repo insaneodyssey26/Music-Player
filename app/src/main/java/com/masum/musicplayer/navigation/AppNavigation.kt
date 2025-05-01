@@ -66,6 +66,7 @@ fun AppNavigation(viewModel: MusicViewModel) {
                         title = when (currentRoute) {
                             Screen.Home.route -> Screen.Home.title
                             Screen.Settings.route -> Screen.Settings.title
+                            Screen.NowPlaying.route -> Screen.NowPlaying.title
                             else -> Screen.Home.title
                         },
                         onMenuClick = {
@@ -79,8 +80,13 @@ fun AppNavigation(viewModel: MusicViewModel) {
             bottomBar = {
                 if (currentRoute != Screen.NowPlaying.route) {
                     ModernBottomBar(
-                        currentDestination = currentDestination,
-                        navController = navController
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
             }
@@ -113,7 +119,6 @@ fun AppNavigation(viewModel: MusicViewModel) {
                     exitTransition = { fadeOut(animationSpec = tween(300, easing = EaseOutQuart)) }
                 ) {
                     SettingsScreen(
-                        navController = navController,
                         onBackClick = {
                             navController.popBackStack()
                         }

@@ -10,20 +10,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.masum.musicplayer.navigation.AppNavigation
 import com.masum.musicplayer.presentation.viewmodel.MusicViewModel
 import com.masum.musicplayer.presentation.viewmodel.MusicViewModelFactory
 import com.masum.musicplayer.theme.ThemeManager
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MusicViewModel
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (!isGranted) {
+        if (isGranted) {
+            // Initialize ViewModel after permission is granted
+            initializeViewModel()
+        } else {
             // Handle permission denied
+            // You might want to show a dialog explaining why the permission is needed
+            // or disable functionality that depends on this permission
         }
+    }
+
+    private fun initializeViewModel() {
+        viewModel = ViewModelProvider(
+            this,
+            MusicViewModelFactory(applicationContext)
+        )[MusicViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,12 +55,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val context = LocalContext.current
-                    val viewModel: MusicViewModel = viewModel(
-                        factory = MusicViewModelFactory(context)
-                    )
-                    
-                    AppNavigation(viewModel = viewModel)
+                    if (::viewModel.isInitialized) {
+                        AppNavigation(viewModel = viewModel)
+                    }
                 }
             }
         }
