@@ -43,6 +43,9 @@ fun HomeScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val error by viewModel.error.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val recentlyAdded by viewModel.recentlyAdded.collectAsState()
+    val mostPlayed by viewModel.mostPlayed.collectAsState()
+    val favorites by viewModel.favorites.collectAsState()
 
     Box(
         modifier = Modifier
@@ -103,7 +106,6 @@ fun HomeScreen(
                             title = "Recently Added",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
                         )
-                        val recentlyAdded by viewModel.recentlyAdded.collectAsState()
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -111,7 +113,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(recentlyAdded) { song ->
+                            items(recentlyAdded, key = { it.id }) { song ->
                                 RecentlyPlayedCard(
                                     song = song,
                                     onClick = { onSongClick(song) }
@@ -126,7 +128,6 @@ fun HomeScreen(
                             title = "Most Played",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
-                        val mostPlayed by viewModel.mostPlayed.collectAsState()
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -134,7 +135,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(mostPlayed) { song ->
+                            items(mostPlayed, key = { it.id }) { song ->
                                 RecentlyPlayedCard(
                                     song = song,
                                     onClick = { onSongClick(song) }
@@ -149,7 +150,6 @@ fun HomeScreen(
                             title = "Favorites",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
-                        val favorites by viewModel.favorites.collectAsState()
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -157,7 +157,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(favorites) { song ->
+                            items(favorites, key = { it.id }) { song ->
                                 RecentlyPlayedCard(
                                     song = song,
                                     onClick = { onSongClick(song) }
@@ -174,7 +174,7 @@ fun HomeScreen(
                         )
                     }
 
-                    items(songs) { song ->
+                    items(songs, key = { it.id }) { song ->
                         SongListItem(
                             song = song,
                             isPlaying = currentSong?.id == song.id && isPlaying,
@@ -277,7 +277,7 @@ private fun RecentlyPlayedCard(
     Card(
         modifier = Modifier
             .width(140.dp)
-            .height(180.dp)
+            .height(210.dp)
             .clickable(onClick = onClick)
             .shadow(
                 elevation = 4.dp,
