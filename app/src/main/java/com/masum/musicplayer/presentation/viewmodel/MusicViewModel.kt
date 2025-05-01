@@ -44,17 +44,34 @@ class MusicViewModel(context: Context) : ViewModel() {
     
     private var progressUpdateJob: Job? = null
     
-    // Recently Added: last 10 songs by a mock 'dateAdded' property (if available)
-    val recentlyAdded: StateFlow<List<Song>>
-        get() = MutableStateFlow(_songs.value.sortedByDescending { it.id }.take(10))
-
-    // Most Played: mock logic, just return first 10 songs for now
-    val mostPlayed: StateFlow<List<Song>>
-        get() = MutableStateFlow(_songs.value.take(10))
-
-    // Favorites: mock logic, just return first 5 songs for now
+    // --- FAVORITES LOGIC ---
+    private val _favoriteSongIds = MutableStateFlow<Set<Long>>(emptySet())
+    val favoriteSongIds: StateFlow<Set<Long>> = _favoriteSongIds.asStateFlow()
+    fun toggleFavorite(song: Song) {
+        _favoriteSongIds.value = if (_favoriteSongIds.value.contains(song.id)) {
+            _favoriteSongIds.value - song.id
+        } else {
+            _favoriteSongIds.value + song.id
+        }
+    }
     val favorites: StateFlow<List<Song>>
-        get() = MutableStateFlow(_songs.value.take(5))
+        get() = MutableStateFlow(_songs.value.filter { _favoriteSongIds.value.contains(it.id) })
+
+    // --- MOST PLAYED LOGIC ---
+    private val _playCounts = MutableStateFlow<Map<Long, Int>>(emptyMap())
+    val playCounts: StateFlow<Map<Long, Int>> = _playCounts.asStateFlow()
+    fun incrementPlayCount(song: Song) {
+        _playCounts.value = _playCounts.value.toMutableMap().apply {
+            put(song.id, getOrDefault(song.id, 0) + 1)
+        }
+    }
+    val mostPlayed: StateFlow<List<Song>>
+        get() = MutableStateFlow(_songs.value.sortedByDescending { _playCounts.value[it.id] ?: 0 }.take(10))
+
+    // --- RECENTLY ADDED LOGIC ---
+    // Use year as a proxy for recently added (if no dateAdded)
+    val recentlyAdded: StateFlow<List<Song>>
+        get() = MutableStateFlow(_songs.value.sortedByDescending { it.year }.take(10))
     
     init {
         Log.d(TAG, "Initializing MusicViewModel")
@@ -148,6 +165,8 @@ class MusicViewModel(context: Context) : ViewModel() {
                 exoPlayer.prepare()
                 exoPlayer.playWhenReady = true
                 startProgressUpdate()
+                // Increment play count for most played
+                incrementPlayCount(song)
             } ?: run {
                 Log.e(TAG, "Player not initialized")
                 _error.value = "Player not initialized"
