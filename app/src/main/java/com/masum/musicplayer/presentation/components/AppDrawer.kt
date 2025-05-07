@@ -53,7 +53,7 @@ fun AppDrawer(
 
             // Version Info
             Text(
-                text = "Version 1.0 Beta",
+                text = "Version Beta 2.0",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 modifier = Modifier
