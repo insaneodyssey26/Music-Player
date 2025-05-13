@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.border
+import androidx.compose.runtime.mutableFloatStateOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +89,7 @@ fun NowPlayingScreen(
     onBackClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var offsetY by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val density = LocalDensity.current
