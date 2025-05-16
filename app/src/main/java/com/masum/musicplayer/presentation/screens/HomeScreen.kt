@@ -1,3 +1,4 @@
+
 package com.masum.musicplayer.presentation.screens
 
 import androidx.compose.animation.AnimatedVisibility
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -50,7 +53,14 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
     ) {
         when {
             isLoading -> LoadingScreen()
@@ -64,40 +74,7 @@ fun HomeScreen(
                 ) {
                     // Hero Section
                     item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.background
-                                        )
-                                    )
-                                )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Welcome Back!",
-                                    style = MaterialTheme.typography.displaySmall.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "What would you like to listen to?",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
+                        HeroSection()
                     }
 
                     // Recently Added Section
@@ -113,11 +90,22 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(recentlyAdded, key = { it.id }) { song ->
-                                RecentlyPlayedCard(
-                                    song = song,
-                                    onClick = { onSongClick(song) }
-                                )
+                            itemsIndexed(recentlyAdded, key = { _, song -> song.id }) { index, song ->
+                                var visible by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) {
+                                    kotlinx.coroutines.delay((index * 80).toLong())
+                                    visible = true
+                                }
+                                AnimatedVisibility(
+                                    visible = visible,
+                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
+                                    exit = fadeOut()
+                                ) {
+                                    RecentlyPlayedCard(
+                                        song = song,
+                                        onClick = { onSongClick(song) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -135,11 +123,22 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(mostPlayed, key = { it.id }) { song ->
-                                RecentlyPlayedCard(
-                                    song = song,
-                                    onClick = { onSongClick(song) }
-                                )
+                            itemsIndexed(mostPlayed, key = { _, song -> song.id }) { index, song ->
+                                var visible by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) {
+                                    kotlinx.coroutines.delay((index * 80).toLong())
+                                    visible = true
+                                }
+                                AnimatedVisibility(
+                                    visible = visible,
+                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
+                                    exit = fadeOut()
+                                ) {
+                                    RecentlyPlayedCard(
+                                        song = song,
+                                        onClick = { onSongClick(song) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -157,11 +156,22 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(favorites, key = { it.id }) { song ->
-                                RecentlyPlayedCard(
-                                    song = song,
-                                    onClick = { onSongClick(song) }
-                                )
+                            itemsIndexed(favorites, key = { _, song -> song.id }) { index, song ->
+                                var visible by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) {
+                                    kotlinx.coroutines.delay((index * 80).toLong())
+                                    visible = true
+                                }
+                                AnimatedVisibility(
+                                    visible = visible,
+                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
+                                    exit = fadeOut()
+                                ) {
+                                    RecentlyPlayedCard(
+                                        song = song,
+                                        onClick = { onSongClick(song) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -174,12 +184,23 @@ fun HomeScreen(
                         )
                     }
 
-                    items(songs, key = { it.id }) { song ->
-                        SongListItem(
-                            song = song,
-                            isPlaying = currentSong?.id == song.id && isPlaying,
-                            onClick = { onSongClick(song) }
-                        )
+                    itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
+                        var visible by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay((index * 60).toLong())
+                            visible = true
+                        }
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn(animationSpec = tween(500)) + slideInVertically(),
+                            exit = fadeOut()
+                        ) {
+                            SongListItem(
+                                song = song,
+                                isPlaying = currentSong?.id == song.id && isPlaying,
+                                onClick = { onSongClick(song) }
+                            )
+                        }
                     }
                 }
             }
@@ -201,6 +222,33 @@ fun HomeScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun HeroSection() {
+    // Simple animated hero section placeholder to prevent crash
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .padding(16.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.secondary
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Welcome to Music Player!",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
     }
 }
 
