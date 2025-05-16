@@ -227,7 +227,7 @@ fun HomeScreen(
 
 @Composable
 fun HeroSection() {
-    // Simple animated hero section placeholder to prevent crash
+    // Professional, subtle vertical gradient using primary and transparent
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -235,10 +235,10 @@ fun HeroSection() {
             .padding(16.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(
-                Brush.horizontalGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     )
                 )
             ),
@@ -246,7 +246,7 @@ fun HeroSection() {
     ) {
         Text(
             text = "Hey, what's up!",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onPrimary
         )
     }
