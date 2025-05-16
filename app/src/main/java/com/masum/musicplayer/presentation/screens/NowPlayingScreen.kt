@@ -75,6 +75,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.transform.BlurTransformation
 import com.masum.musicplayer.presentation.viewmodel.MusicViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -105,20 +106,16 @@ fun NowPlayingScreen(
     var isShuffle by remember { mutableStateOf(false) }
     var isRepeat by remember { mutableStateOf(false) }
 
-    // Blurred background from album art
-    var albumArtBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
-    LaunchedEffect(currentSong?.albumArtUri) {
-        currentSong?.albumArtUri?.let { uri ->
-            val request = ImageRequest.Builder(context)
-                .data(uri)
-                .allowHardware(false)
-                .build()
-            val result = context.imageLoader.execute(request)
-            if (result is SuccessResult) {
-                albumArtBitmap = (result.drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
-            }
-        }
-    }
+    // Blurred background from album art (async, hardware-accelerated with Coil)
+    val blurredPainter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(context)
+            .data(currentSong?.albumArtUri)
+            .crossfade(true)
+            .transformations(
+                BlurTransformation(context, radius = 24f, sampling = 4f)
+            )
+            .build()
+    )
 
     Box(
         modifier = Modifier
@@ -145,14 +142,12 @@ fun NowPlayingScreen(
                 )
             }
     ) {
-        // Blurred background
-        albumArtBitmap?.let { bmp ->
+        // Blurred background (async, fast)
+        if (currentSong?.albumArtUri != null) {
             Image(
-                bitmap = bmp.asImageBitmap(),
+                painter = blurredPainter,
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(32.dp),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             // Dark gradient overlay for readability
@@ -168,18 +163,20 @@ fun NowPlayingScreen(
                         )
                     )
             )
-        } ?: Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.background
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.background
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         Column(
             modifier = Modifier

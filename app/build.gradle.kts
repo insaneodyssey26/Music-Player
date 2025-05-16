@@ -84,6 +84,8 @@ dependencies {
     
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
+    // Coil transformations for BlurTransformation
+    implementation("io.coil-kt:coil-transformations:2.4.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

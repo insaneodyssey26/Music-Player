@@ -1,0 +1,7 @@
+// Add this to your app/build.gradle.kts or build.gradle (Module: app)
+// For Coil's blur transformation
+
+dependencies {
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-transformations:2.4.0")
+}

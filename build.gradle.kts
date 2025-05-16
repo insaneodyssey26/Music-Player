@@ -5,7 +5,15 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
 }
 
+
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+allprojects {
     repositories {
         google()
         mavenCentral()

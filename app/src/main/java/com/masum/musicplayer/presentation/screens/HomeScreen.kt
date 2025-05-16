@@ -90,22 +90,11 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            itemsIndexed(recentlyAdded, key = { _, song -> song.id }) { index, song ->
-                                var visible by remember { mutableStateOf(false) }
-                                LaunchedEffect(Unit) {
-                                    kotlinx.coroutines.delay((index * 80).toLong())
-                                    visible = true
-                                }
-                                AnimatedVisibility(
-                                    visible = visible,
-                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
-                                    exit = fadeOut()
-                                ) {
-                                    RecentlyPlayedCard(
-                                        song = song,
-                                        onClick = { onSongClick(song) }
-                                    )
-                                }
+                            items(recentlyAdded, key = { it.id }) { song ->
+                                RecentlyPlayedCard(
+                                    song = song,
+                                    onClick = { onSongClick(song) }
+                                )
                             }
                         }
                     }
@@ -123,22 +112,11 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            itemsIndexed(mostPlayed, key = { _, song -> song.id }) { index, song ->
-                                var visible by remember { mutableStateOf(false) }
-                                LaunchedEffect(Unit) {
-                                    kotlinx.coroutines.delay((index * 80).toLong())
-                                    visible = true
-                                }
-                                AnimatedVisibility(
-                                    visible = visible,
-                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
-                                    exit = fadeOut()
-                                ) {
-                                    RecentlyPlayedCard(
-                                        song = song,
-                                        onClick = { onSongClick(song) }
-                                    )
-                                }
+                            items(mostPlayed, key = { it.id }) { song ->
+                                RecentlyPlayedCard(
+                                    song = song,
+                                    onClick = { onSongClick(song) }
+                                )
                             }
                         }
                     }
@@ -156,22 +134,11 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            itemsIndexed(favorites, key = { _, song -> song.id }) { index, song ->
-                                var visible by remember { mutableStateOf(false) }
-                                LaunchedEffect(Unit) {
-                                    kotlinx.coroutines.delay((index * 80).toLong())
-                                    visible = true
-                                }
-                                AnimatedVisibility(
-                                    visible = visible,
-                                    enter = fadeIn(animationSpec = tween(600)) + slideInVertically(),
-                                    exit = fadeOut()
-                                ) {
-                                    RecentlyPlayedCard(
-                                        song = song,
-                                        onClick = { onSongClick(song) }
-                                    )
-                                }
+                            items(favorites, key = { it.id }) { song ->
+                                RecentlyPlayedCard(
+                                    song = song,
+                                    onClick = { onSongClick(song) }
+                                )
                             }
                         }
                     }
@@ -184,23 +151,12 @@ fun HomeScreen(
                         )
                     }
 
-                    itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
-                        var visible by remember { mutableStateOf(false) }
-                        LaunchedEffect(Unit) {
-                            kotlinx.coroutines.delay((index * 60).toLong())
-                            visible = true
-                        }
-                        AnimatedVisibility(
-                            visible = visible,
-                            enter = fadeIn(animationSpec = tween(500)) + slideInVertically(),
-                            exit = fadeOut()
-                        ) {
-                            SongListItem(
-                                song = song,
-                                isPlaying = currentSong?.id == song.id && isPlaying,
-                                onClick = { onSongClick(song) }
-                            )
-                        }
+                    items(songs, key = { it.id }) { song ->
+                        SongListItem(
+                            song = song,
+                            isPlaying = currentSong?.id == song.id && isPlaying,
+                            onClick = { onSongClick(song) }
+                        )
                     }
                 }
             }
