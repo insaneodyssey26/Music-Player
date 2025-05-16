@@ -245,7 +245,7 @@ fun HeroSection() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Welcome to Music Player!",
+            text = "Hey, what's up!",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onPrimary
         )
